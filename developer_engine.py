@@ -27,7 +27,7 @@ def recover_interrupted_jobs():
                 ("Process restarted before the job completed; inspect checkpoint and restart manually.",
                  json.dumps({"verification":"Interrupted; not verified","error":"ORBIT process restarted"}),now(),row["id"]))
     for row in rows:
-        audit("developer_job_interrupted",f"id={row[chr(105)+chr(100)]}; prior_state={row[chr(115)+chr(116)+chr(97)+chr(116)+chr(101)]}")
+        audit("developer_job_interrupted",f"id={row['id']}; prior_state={row['state']}")
     return len(rows)
 
 def _update_job(job_id, state=None, progress=None, result=None):
