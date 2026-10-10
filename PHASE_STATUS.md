@@ -6,6 +6,9 @@
 - [x] Browser-based Founder console
 - [x] SQLite conversation history, task ledger and audit events
 - [x] Task plan generation with basic risk labels
+- [x] Founder / CEO / Developer / Research / QA role registry
+- [x] CEO planning endpoint with durable task record
+- [x] Dashboard action to submit goals to CEO planner
 - [x] Workspace-confined text file read/write APIs
 - [x] Optional Ollama provider
 - [x] Windows launch script and initial tests
