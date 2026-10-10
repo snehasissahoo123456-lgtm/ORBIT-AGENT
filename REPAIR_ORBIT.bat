@@ -75,10 +75,20 @@ if not exist "workspace" mkdir "workspace"
 if not exist "data" mkdir "data"
 
 echo.
-echo Running Python syntax checks...
-".venv\Scripts\python.exe" -m compileall -q .
+echo Running Python syntax checks on ORBIT source files...
+".venv\Scripts\python.exe" -m compileall -q main.py config.py memory.py provider.py security.py agents.py developer_engine.py research.py reporting.py process_tools.py auth.py orbit_core.py
 if errorlevel 1 (
   echo ERROR: Python syntax check failed. ORBIT was not launched.
+  pause
+  exit /b 1
+)
+
+echo.
+echo Running automated tests...
+".venv\Scripts\python.exe" -m pytest -q
+if errorlevel 1 (
+  echo ERROR: Automated tests failed. ORBIT was not launched.
+  echo Save the test output and send it for diagnosis.
   pause
   exit /b 1
 )
