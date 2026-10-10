@@ -38,4 +38,4 @@ $('refresh').onclick=refresh;
 $('listen').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Speech recognition is not supported in this browser. Try a compatible Chromium browser.');return}const rec=new SR();rec.lang=$('language').value;rec.interimResults=false;rec.onresult=e=>{$('message').value=e.results[0][0].transcript;$('message').focus()};rec.onerror=e=>alert('Voice input unavailable: '+e.error);rec.start()};
 $('speak').onclick=()=>{if(!lastReply)return alert('There is no reply to read yet.');if(!window.speechSynthesis)return alert('Speech output is not supported by this browser.');const utterance=new SpeechSynthesisUtterance(lastReply);utterance.lang=$('language').value;window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance)};
 checkAuth();setInterval(()=>{if(isAuthenticated)refresh()},7000);
-</script></body></html>
+</script><script src="/static/followups.js" defer></script></body></html>
