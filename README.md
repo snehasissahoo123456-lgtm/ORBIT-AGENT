@@ -5,13 +5,13 @@ ORBIT is a local-first AI agent project for a Founder-controlled workspace. The 
 **This is an active development build, not a fully autonomous PC operating system.** Remote access, full desktop control, employee accounts and true independent multi-agent coordination are not complete.
 
 ## Current features in code
-- FastAPI dashboard and rotating application log
+- FastAPI dashboard, rotating application log and activation diagnostics for SQLite, workspace, Ollama and Playwright
 - Founder account setup with PBKDF2 password hashing and 12-hour HttpOnly sessions
 - SQLite conversation, task, audit and developer-job records
 - Optional local Ollama chat using the configured model
 - Explicitly approved Developer Agent jobs: bounded model-proposed text-file edits within workspace/, checkpoints for overwritten files and up to three test/fix passes
 - Explicitly approved, allowlisted terminal command endpoint; shell=False, workspace-only working directory and timeouts
-- Web search snippets with source URLs and optional Playwright HTTPS page reading
+- Web search snippets with source URLs and optional Playwright HTTPS page reading with private-network URL blocking
 - Browser speech input/output where supported by the browser/OS
 - PDF and PPTX daily reports, scheduled at 23:55 Asia/Kolkata while ORBIT is running
 - Startup marks interrupted developer jobs for review instead of silently resuming them
@@ -25,7 +25,7 @@ ORBIT is a local-first AI agent project for a Founder-controlled workspace. The 
 5. For local-model chat and code generation, install Ollama separately and run: ollama pull qwen2.5:7b
 6. Run tests with .venv\Scripts\python.exe -m pytest.
 
-The app runs on the PC while its terminal window is open. Model-backed chat and developer jobs require the local model service to be running. The first install may take several minutes because dependencies and browser files are downloaded.
+The app runs on the PC while its terminal window is open. Model-backed chat and developer jobs require the local model service to be running. The dashboard's System status & safety panel shows whether Ollama is reachable and whether the configured model is installed. The first install may take several minutes because dependencies and browser files are downloaded.
 
 ## Safety and limitations
 - The server is configured for loopback only. Startup refuses a non-loopback host because secure remote access is not implemented.
