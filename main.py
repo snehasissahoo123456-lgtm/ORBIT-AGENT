@@ -4,7 +4,8 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from zoneinfo import ZoneInfo
 from logging.handlers import RotatingFileHandler
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, HTTPException, Header, Request, Response
+from fastapi.responses import JSONResponse
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -18,6 +19,7 @@ from developer_engine import create_job, get_job, list_jobs, run_job, recover_in
 from research import research, open_page
 from reporting import generate_daily_reports
 from process_tools import run_command
+from auth import initialise_auth, founder_exists, setup_founder, create_session, authenticate, revoke_session
 
 LOG_DIR = Path(__file__).parent / "logs"
 LOG_DIR.mkdir(exist_ok=True)
@@ -30,9 +32,23 @@ app = FastAPI(title="ORBIT Founder Agent", version="0.2.0")
 STATIC = Path(__file__).parent / "static"
 STATIC.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
+
+@app.middleware("http")
+async def founder_auth_gate(request: Request, call_next):
+    path=request.url.path
+    exempt={"/api/health","/api/auth/status","/api/auth/setup","/api/auth/login","/api/auth/logout"}
+    if path.startswith("/api/") and path not in exempt:
+        if not founder_exists():
+            return JSONResponse(status_code=401,content={"detail":"FOUNDER_SETUP_REQUIRED"})
+        if not authenticate(request.cookies.get("orbit_session")):
+            return JSONResponse(status_code=401,content={"detail":"AUTH_REQUIRED"})
+    return await call_next(request)
 RUNNING_JOBS: dict[str, asyncio.Task] = {}
 SCHEDULER = AsyncIOScheduler(timezone=ZoneInfo("Asia/Kolkata"))
 
+class AuthRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=64)
+    password: str = Field(min_length=1, max_length=256)
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=8000)
 class PlanRequest(BaseModel):
@@ -57,6 +73,7 @@ class DeveloperRequest(BaseModel):
 @app.on_event("startup")
 def on_startup():
     initialise()
+    initialise_auth()
     settings.workspace.mkdir(parents=True, exist_ok=True)
     interrupted = recover_interrupted_jobs()
     SCHEDULER.add_job(generate_daily_reports, "cron", hour=23, minute=55, id="orbit-daily-report", replace_existing=True)
@@ -76,6 +93,42 @@ async def on_shutdown():
 def index():
     page = STATIC / "index.html"
     return page.read_text(encoding="utf-8") if page.exists() else "<h1>ORBIT</h1><p>Dashboard missing.</p>"
+
+@app.get("/api/auth/status")
+def auth_status(request: Request):
+    exists=founder_exists()
+    username=authenticate(request.cookies.get("orbit_session"))
+    return {"founder_setup_required":not exists,"authenticated":bool(username),"username":username}
+
+@app.post("/api/auth/setup")
+def auth_setup(req: AuthRequest, response: Response):
+    try:
+        setup_founder(req.username,req.password)
+        session=create_session(req.username,req.password)
+        if not session:
+            raise HTTPException(500,"Founder account was created but session creation failed.")
+        token,username=session
+        response.set_cookie("orbit_session",token,httponly=True,samesite="strict",secure=False,max_age=12*60*60,path="/")
+        audit("founder_account_created","Founder root account initialized")
+        return {"ok":True,"username":username,"message":"Founder account created. Save your password securely."}
+    except ValueError as exc:
+        raise HTTPException(409 if "already configured" in str(exc) else 400,str(exc)) from exc
+
+@app.post("/api/auth/login")
+def auth_login(req: AuthRequest, response: Response):
+    session=create_session(req.username,req.password)
+    if not session:
+        raise HTTPException(401,"Incorrect username or password.")
+    token,username=session
+    response.set_cookie("orbit_session",token,httponly=True,samesite="strict",secure=False,max_age=12*60*60,path="/")
+    audit("founder_login","Founder session created")
+    return {"ok":True,"username":username}
+
+@app.post("/api/auth/logout")
+def auth_logout(request: Request, response: Response):
+    revoke_session(request.cookies.get("orbit_session"))
+    response.delete_cookie("orbit_session",path="/",httponly=True,samesite="strict")
+    return {"ok":True}
 
 @app.get("/api/health")
 def health():
