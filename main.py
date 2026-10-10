@@ -141,8 +141,9 @@ def health():
 async def send_chat(req: ChatRequest):
     message=req.message.strip()
     if not message: raise HTTPException(422,"Message cannot be blank")
+    history=get_messages(12)
     add_message("user",message)
-    answer=await chat(message, history=get_messages(12))
+    answer=await chat(message, history=history)
     add_message("assistant",answer)
     audit("chat",f"user_message_length={len(message)}")
     return {"reply":answer}
