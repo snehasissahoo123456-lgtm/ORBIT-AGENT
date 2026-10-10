@@ -1,6 +1,7 @@
 from pathlib import Path
 import asyncio
 import logging
+import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from zoneinfo import ZoneInfo
 from logging.handlers import RotatingFileHandler
@@ -11,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from config import settings
 from orbit_core import plan_goal
-from memory import initialise, add_message, audit, get_messages, create_task, get_tasks, get_audit, update_task_state
+from memory import initialise, add_message, audit, get_messages, create_task, get_tasks, get_audit, update_task_state, connect
 from provider import chat
 from security import workspace_path
 from agents import organization, ceo_plan
@@ -131,6 +132,48 @@ def auth_logout(request: Request, response: Response):
     revoke_session(request.cookies.get("orbit_session"))
     response.delete_cookie("orbit_session",path="/",httponly=True,samesite="strict")
     return {"ok":True}
+
+@app.get("/api/diagnostics")
+async def diagnostics():
+    checks = {
+        "api": {"ok": True, "detail": "FastAPI is responding"},
+        "database": {"ok": False, "detail": "Not checked"},
+        "workspace": {"ok": False, "detail": "Not checked"},
+        "ollama": {"ok": False, "detail": "Not reachable"},
+        "playwright": {"ok": False, "detail": "Not checked"},
+    }
+    try:
+        with connect() as db:
+            db.execute("SELECT 1").fetchone()
+        checks["database"] = {"ok": True, "detail": "SQLite opened successfully"}
+    except Exception as exc:
+        checks["database"] = {"ok": False, "detail": type(exc).__name__}
+    try:
+        settings.workspace.mkdir(parents=True, exist_ok=True)
+        probe = settings.workspace / ".orbit-write-check"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink()
+        checks["workspace"] = {"ok": True, "detail": "Workspace is writable"}
+    except Exception as exc:
+        checks["workspace"] = {"ok": False, "detail": type(exc).__name__}
+    try:
+        async with httpx.AsyncClient(timeout=3) as client:
+            response = await client.get(settings.ollama_base_url.rstrip("/") + "/api/tags")
+            response.raise_for_status()
+            models = [item.get("name", "") for item in response.json().get("models", [])]
+        checks["ollama"] = {"ok": True, "detail": "Ollama reachable", "configured_model": settings.ollama_model,
+                             "model_installed": settings.ollama_model in models, "installed_models": models[:30]}
+    except Exception as exc:
+        checks["ollama"] = {"ok": False, "detail": type(exc).__name__,
+                             "hint": "Start Ollama and install the configured model"}
+    try:
+        from playwright.async_api import async_playwright  # noqa: F401
+        checks["playwright"] = {"ok": True, "detail": "Playwright Python package installed"}
+    except ImportError:
+        checks["playwright"] = {"ok": False, "detail": "Install requirements and Playwright"}
+    overall = all(checks[key]["ok"] for key in ("api", "database", "workspace"))
+    return {"ok": overall, "checks": checks, "remote_access": False,
+            "note": "A reachable Ollama service must also contain the configured model for chat and coding."}
 
 @app.get("/api/health")
 def health():
