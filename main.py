@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from config import settings
 from orbit_core import plan_goal
-from memory import initialise, add_message, audit, get_messages, create_task, get_tasks, get_audit
+from memory import initialise, add_message, audit, get_messages, create_task, get_tasks, get_audit, update_task_state
 from provider import chat
 from security import workspace_path
 from agents import organization, ceo_plan
@@ -142,7 +142,7 @@ async def send_chat(req: ChatRequest):
     message=req.message.strip()
     if not message: raise HTTPException(422,"Message cannot be blank")
     add_message("user",message)
-    answer=await chat(message)
+    answer=await chat(message, history=get_messages(12))
     add_message("assistant",answer)
     audit("chat",f"user_message_length={len(message)}")
     return {"reply":answer}
@@ -211,6 +211,23 @@ def founder_request_to_ceo(req: PlanRequest):
     audit("ceo_plan_created",f"task_id={task_id}; goal={result['goal'][:400]}")
     return {"task_id":task_id,**result}
 
+async def sync_task_state(task_id: int, job_id: str):
+    """Mirror developer job terminal states into the CEO task ledger."""
+    terminal={"COMPLETED","FAILED","BLOCKED","NEEDS_REVIEW","STOPPED"}
+    try:
+        while True:
+            job=get_job(job_id)
+            if not job:
+                update_task_state(task_id,"FAILED","Developer job record disappeared")
+                return
+            state=job.get("state","RUNNING")
+            if state in terminal:
+                update_task_state(task_id,state,f"developer_job={job_id}; verification={job.get(chr(114)+chr(101)+chr(115)+chr(117)+chr(108)+chr(116),{}).get(chr(118)+chr(101)+chr(114)+chr(105)+chr(102)+chr(105)+chr(99)+chr(97)+chr(116)+chr(105)+chr(111)+chr(110),chr(117)+chr(110)+chr(107)+chr(110)+chr(111)+chr(119)+chr(110))}")
+                return
+            await asyncio.sleep(1)
+    except asyncio.CancelledError:
+        raise
+
 @app.post("/api/ceo/execute")
 async def ceo_execute_approved(req: DeveloperRequest):
     if not req.approved_by_founder:
@@ -222,6 +239,7 @@ async def ceo_execute_approved(req: DeveloperRequest):
     task_id=create_task(req.goal,"RUNNING",plan)
     job=create_job(req.goal)
     RUNNING_JOBS[job["id"]]=asyncio.create_task(run_job(job["id"]),name="orbit-ceo-delegated-"+job["id"])
+    asyncio.create_task(sync_task_state(task_id, job["id"]))
     audit("ceo_delegated_to_developer",f"task_id={task_id}; job_id={job[chr(105)+chr(100)]}")
     return {"task_id":task_id,"plan":plan,"developer_job":job,"message":"CEO created an auditable plan and delegated implementation to the bounded Developer Agent."}
 
