@@ -1,15 +1,20 @@
+import tempfile
+from pathlib import Path
 from fastapi.testclient import TestClient
+from config import settings
 from main import app
 
+settings.orbit_database = str(Path(tempfile.mkdtemp()) / "orbit-test.sqlite3")
 client = TestClient(app)
 
 
-def test_health_reports_local_mode():
+def test_health_and_founder_setup():
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json()["name"] == "ORBIT"
     setup = client.post("/api/auth/setup", json={"username":"orbit-founder-test","password":"test-password-that-is-long-123"})
-    assert setup.status_code in (200, 409)
+    assert setup.status_code == 200
+    assert setup.json()["ok"] is True
 
 
 def test_developer_requires_explicit_approval():
