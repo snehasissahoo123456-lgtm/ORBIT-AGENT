@@ -35,3 +35,17 @@ def test_ceo_delegation_requires_explicit_approval(client):
 def test_terminal_requires_explicit_approval(client):
     response = client.post("/api/command/execute", json={"command": "python --version"})
     assert response.status_code == 403
+
+def test_diagnostics_reports_activation_dependencies(client):
+    response = client.get("/api/diagnostics")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["checks"]["api"]["ok"] is True
+    assert "ollama" in body["checks"]
+    assert body["remote_access"] is False
+
+
+def test_protected_api_requires_founder_session():
+    unauthenticated = TestClient(app)
+    response = unauthenticated.get("/api/tasks")
+    assert response.status_code == 401
