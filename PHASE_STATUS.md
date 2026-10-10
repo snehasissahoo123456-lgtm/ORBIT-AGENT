@@ -4,6 +4,8 @@ This status records code committed to the repository separately from behavior ve
 
 ## Implemented in repository code
 - [x] FastAPI local application, health/status endpoints and rotating application log
+- [x] Founder-root account setup, password hashing and expiring HttpOnly sessions
+- [x] API authentication gate after first Founder setup; public network binding refused
 - [x] SQLite messages, tasks, audit events and durable developer-job records
 - [x] Founder dashboard for chat, plans, CEO planner, workspace, status and job results
 - [x] Optional Ollama local chat provider
@@ -17,6 +19,8 @@ This status records code committed to the repository separately from behavior ve
 - [x] Web research snippets with source URLs
 - [x] Optional Playwright page text extraction for HTTPS URLs
 - [x] Daily PDF/PPTX report generation when dependencies are installed
+- [x] Daily report scheduler at 23:55 Asia/Kolkata while ORBIT is running
+- [x] Interrupted running/queued jobs are marked for review on restart; jobs are not silently resumed
 - [x] Browser speech input/output controls where browser and OS support the selected language
 - [x] Automated unit tests and GitHub Actions workflow
 - [x] API tests for health and approval gates
@@ -33,8 +37,8 @@ This status records code committed to the repository separately from behavior ve
 
 ## Not implemented
 - [ ] Full desktop control and application interaction
-- [ ] Durable scheduler/worker queue with retry policy and automatic crash recovery
-- [ ] Founder and employee accounts, authentication and role management
+- [ ] Durable worker queue with retry policy; scheduled reports run only while the PC and ORBIT process are on
+- [ ] Employee accounts, department-specific role management and account administration
 - [ ] Secure phone-to-PC remote access
 - [ ] Production-grade approvals, sandbox/container isolation and full rollback for newly created files
 - [ ] Specialist agents with dependency-aware delegation and independent verification
@@ -49,3 +53,9 @@ This status records code committed to the repository separately from behavior ve
 
 ## Latest integration note
 - The local API now imports the allowlisted command runner and exposes it only behind the explicit approval field. The dashboard does not expose arbitrary command text. The latest GitHub Actions run must pass before this increment can be called CI-verified.
+
+## Important first-run setup
+- Run INSTALL_AND_RUN.bat on the Windows PC, then open the local dashboard.
+- Create the Founder account on first launch with a unique password of at least 12 characters.
+- Install and start Ollama separately and pull the configured model for local AI chat and coding.
+- Keep the API local-only; remote control remains disabled.
