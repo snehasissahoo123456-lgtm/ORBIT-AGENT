@@ -19,7 +19,7 @@ def generate_daily_reports(day: str | None = None) -> dict:
         story=[Paragraph(f"ORBIT Daily Activity Report — {day}",styles["Title"]),Spacer(1,12),
                Paragraph(f"Tasks recorded: {len(tasks)} · Audit events: {len(events)}",styles["Normal"]),Spacer(1,12)]
         rows=[["Time UTC","Event","Details"]]+[[e["created_at"][11:19],e["event"],e["detail"][:150]] for e in events[:60]]
-        table=Table(rows,repeatRows=1,colWidths=[60,90,350])
+        table=Table(rows,repeatRows=1,colWidths=[50,80,320])
         table.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#19365c")),("TEXTCOLOR",(0,0),(-1,0),colors.white),
                                    ("GRID",(0,0),(-1,-1),.25,colors.grey),("VALIGN",(0,0),(-1,-1),"TOP"),("FONTSIZE",(0,0),(-1,-1),7)]))
         story.append(table); SimpleDocTemplate(str(pdf_path),pagesize=letter).build(story); pdf_result=pdf_path.relative_to(settings.workspace).as_posix()
