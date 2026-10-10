@@ -1,6 +1,8 @@
 from pathlib import Path
 import asyncio
 import logging
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from zoneinfo import ZoneInfo
 from logging.handlers import RotatingFileHandler
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import HTMLResponse
@@ -29,6 +31,7 @@ STATIC = Path(__file__).parent / "static"
 STATIC.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
 RUNNING_JOBS: dict[str, asyncio.Task] = {}
+SCHEDULER = AsyncIOScheduler(timezone=ZoneInfo("Asia/Kolkata"))
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=8000)
@@ -56,10 +59,14 @@ def on_startup():
     initialise()
     settings.workspace.mkdir(parents=True, exist_ok=True)
     interrupted = recover_interrupted_jobs()
-    logger.info("ORBIT started; host=%s port=%s workspace=%s interrupted_jobs=%s", settings.orbit_host, settings.orbit_port, settings.workspace, interrupted)
+    SCHEDULER.add_job(generate_daily_reports, "cron", hour=23, minute=55, id="orbit-daily-report", replace_existing=True)
+    SCHEDULER.start()
+    logger.info("ORBIT started; host=%s port=%s workspace=%s interrupted_jobs=%s daily_report=23:55 Asia/Kolkata", settings.orbit_host, settings.orbit_port, settings.workspace, interrupted)
 
 @app.on_event("shutdown")
 async def on_shutdown():
+    if SCHEDULER.running:
+        SCHEDULER.shutdown(wait=False)
     for job in RUNNING_JOBS.values():
         if not job.done():
             job.cancel()
