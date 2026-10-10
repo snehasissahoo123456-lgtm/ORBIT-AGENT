@@ -43,3 +43,7 @@ This status records code committed to the repository separately from behavior ve
 - Developer edits require explicit approval and are confined to text files inside the workspace directory.
 - Terminal commands use a narrow executable allowlist, shell=False, a workspace working directory and timeouts. Review before using with untrusted projects.
 - Never commit credentials, private data or API keys.
+
+
+## Latest integration note
+- The local API now imports the allowlisted command runner and exposes it only behind the explicit approval field. The dashboard does not expose arbitrary command text. The latest GitHub Actions run must pass before this increment can be called CI-verified.
