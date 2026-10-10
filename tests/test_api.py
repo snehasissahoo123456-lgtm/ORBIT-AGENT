@@ -8,6 +8,8 @@ def test_health_reports_local_mode():
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json()["name"] == "ORBIT"
+    setup = client.post("/api/auth/setup", json={"username":"orbit-founder-test","password":"test-password-that-is-long-123"})
+    assert setup.status_code in (200, 409)
 
 
 def test_developer_requires_explicit_approval():
