@@ -72,6 +72,8 @@ class DeveloperRequest(BaseModel):
 
 @app.on_event("startup")
 def on_startup():
+    if settings.orbit_host not in {"127.0.0.1","localhost"}:
+        raise RuntimeError("ORBIT remote binding is disabled until secure remote access is implemented.")
     initialise()
     initialise_auth()
     settings.workspace.mkdir(parents=True, exist_ok=True)
