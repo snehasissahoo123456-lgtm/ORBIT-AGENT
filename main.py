@@ -158,7 +158,7 @@ async def ceo_execute_approved(req: DeveloperRequest):
     plan=ceo_plan(req.goal)
     task_id=create_task(req.goal,"RUNNING",plan)
     job=create_job(req.goal)
-    RUNNING_JOBS[job["id"]]=asyncio.create_task(run_job(job["id"]),name=f"orbit-ceo-delegated-{job[chr(105)+chr(100)]}")
+    RUNNING_JOBS[job["id"]]=asyncio.create_task(run_job(job["id"]),name="orbit-ceo-delegated-"+job["id"])
     audit("ceo_delegated_to_developer",f"task_id={task_id}; job_id={job[chr(105)+chr(100)]}")
     return {"task_id":task_id,"plan":plan,"developer_job":job,"message":"CEO created an auditable plan and delegated implementation to the bounded Developer Agent."}
 
