@@ -1,31 +1,45 @@
 # ORBIT implementation status
 
-## Stage 1 — local foundation
-- [x] Separate repository for ORBIT
-- [x] FastAPI application and health endpoint
-- [x] Browser-based Founder console
-- [x] SQLite conversation history, task ledger and audit events
-- [x] Task plan generation with basic risk labels
-- [x] Founder / CEO / Developer / Research / QA role registry
-- [x] CEO planning endpoint with durable task record
-- [x] Dashboard action to submit goals to CEO planner
-- [x] Workspace-confined text file read/write APIs
-- [x] Optional Ollama provider
-- [x] Windows launch script and initial tests
+This status records code committed to the repository separately from behavior verified on the Founder's Windows PC.
 
-## Not implemented or not yet verified
-- [ ] Execute tests against a clean Windows installation
-- [ ] Tool registry and controlled task execution loop
-- [ ] Command approval interface and process supervision
-- [ ] CEO coordinator and bounded Developer agents
-- [ ] Automatic build/test/fix/retest loop
-- [ ] Web research with citations
-- [ ] Browser automation and PC control
-- [ ] Voice input/output in English, Hindi and Odia
-- [ ] Founder authentication and employee/role accounts
-- [ ] Secure mobile/remote control
-- [ ] Background scheduler, crash recovery and checkpoints
-- [ ] PDF/PPT daily activity exports
-- [ ] Packaged installer and end-to-end acceptance tests
+## Implemented in repository code
+- [x] FastAPI local application, health/status endpoints and rotating application log
+- [x] SQLite messages, tasks, audit events and durable developer-job records
+- [x] Founder dashboard for chat, plans, CEO planner, workspace, status and job results
+- [x] Optional Ollama local chat provider
+- [x] Workspace-confined text-file read/write APIs
+- [x] Developer job endpoint requiring explicit Founder approval
+- [x] Model-proposed text-file edits with path, size and file-count limits
+- [x] Checkpoints for overwritten files and a bounded three-pass test/fix loop
+- [x] Test runner for recognized Python or npm projects, with captured output
+- [x] Allowlisted terminal endpoint requiring explicit approval, no shell=True and a timeout
+- [x] Web research snippets with source URLs
+- [x] Optional Playwright page text extraction for HTTPS URLs
+- [x] Daily PDF/PPTX report generation when dependencies are installed
+- [x] Browser speech input/output controls where browser and OS support the selected language
+- [x] Automated unit tests and GitHub Actions workflow
 
-A checked item means files were added, not that the full feature has been independently tested. Do not describe the platform as fully autonomous until remaining features are implemented and verified.
+## Partial / requires verification
+- [ ] Install dependencies and run the full app on the Founder's Windows PC
+- [ ] Test model-driven file edits against a real project and review checkpoints
+- [ ] Verify web search works on the user's network; snippets are leads, not verified facts
+- [ ] Install Playwright Chromium and test browser extraction
+- [ ] Generate and inspect PDF/PPT reports on Windows
+- [ ] Verify voice input/output in English, Hindi and Odia on the target browser/OS; Odia support is not guaranteed
+- [ ] Interrupted jobs are recorded but not automatically resumed after a crash
+- [ ] CEO endpoint still creates a plan; it is not yet a true autonomous multi-agent coordinator
+
+## Not implemented
+- [ ] Full desktop control and application interaction
+- [ ] Durable scheduler/worker queue with retry policy and automatic crash recovery
+- [ ] Founder and employee accounts, authentication and role management
+- [ ] Secure phone-to-PC remote access
+- [ ] Production-grade approvals, sandbox/container isolation and full rollback for newly created files
+- [ ] Specialist agents with dependency-aware delegation and independent verification
+- [ ] Comprehensive Windows end-to-end tests and packaged installer
+
+## Safety defaults
+- Keep the server bound to 127.0.0.1; never expose the development API directly to the internet.
+- Developer edits require explicit approval and are confined to text files inside the workspace directory.
+- Terminal commands use a narrow executable allowlist, shell=False, a workspace working directory and timeouts. Review before using with untrusted projects.
+- Never commit credentials, private data or API keys.
