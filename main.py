@@ -213,16 +213,18 @@ def founder_request_to_ceo(req: PlanRequest):
 
 async def sync_task_state(task_id: int, job_id: str):
     """Mirror developer job terminal states into the CEO task ledger."""
-    terminal={"COMPLETED","FAILED","BLOCKED","NEEDS_REVIEW","STOPPED"}
+    terminal = {"COMPLETED", "FAILED", "BLOCKED", "NEEDS_REVIEW", "STOPPED"}
     try:
         while True:
-            job=get_job(job_id)
+            job = get_job(job_id)
             if not job:
-                update_task_state(task_id,"FAILED","Developer job record disappeared")
+                update_task_state(task_id, "FAILED", "Developer job record disappeared")
                 return
-            state=job.get("state","RUNNING")
+            state = job.get("state", "RUNNING")
             if state in terminal:
-                update_task_state(task_id,state,f"developer_job={job_id}; verification={job.get(chr(114)+chr(101)+chr(115)+chr(117)+chr(108)+chr(116),{}).get(chr(118)+chr(101)+chr(114)+chr(105)+chr(102)+chr(105)+chr(99)+chr(97)+chr(116)+chr(105)+chr(111)+chr(110),chr(117)+chr(110)+chr(107)+chr(110)+chr(111)+chr(119)+chr(110))}")
+                result = job.get("result") or {}
+                verification = result.get("verification", "unknown")
+                update_task_state(task_id, state, f"developer_job={job_id}; verification={verification}")
                 return
             await asyncio.sleep(1)
     except asyncio.CancelledError:
