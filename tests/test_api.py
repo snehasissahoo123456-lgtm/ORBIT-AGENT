@@ -1,14 +1,19 @@
 import tempfile
 from pathlib import Path
+import pytest
 from fastapi.testclient import TestClient
 from config import settings
 from main import app
 
 settings.orbit_database = str(Path(tempfile.mkdtemp()) / "orbit-test.sqlite3")
-client = TestClient(app)
+
+@pytest.fixture(scope="module")
+def client():
+    with TestClient(app) as test_client:
+        yield test_client
 
 
-def test_health_and_founder_setup():
+def test_health_and_founder_setup(client):
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json()["name"] == "ORBIT"
@@ -17,16 +22,16 @@ def test_health_and_founder_setup():
     assert setup.json()["ok"] is True
 
 
-def test_developer_requires_explicit_approval():
+def test_developer_requires_explicit_approval(client):
     response = client.post("/api/developer/jobs", json={"goal": "create a test project"})
     assert response.status_code == 403
 
 
-def test_ceo_delegation_requires_explicit_approval():
+def test_ceo_delegation_requires_explicit_approval(client):
     response = client.post("/api/ceo/execute", json={"goal": "create a test project"})
     assert response.status_code == 403
 
 
-def test_terminal_requires_explicit_approval():
+def test_terminal_requires_explicit_approval(client):
     response = client.post("/api/command/execute", json={"command": "python --version"})
     assert response.status_code == 403
