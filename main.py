@@ -8,6 +8,7 @@ from orbit_core import plan_goal
 from memory import initialise, add_message, audit, get_messages, create_task, get_tasks, get_audit
 from provider import chat
 from security import workspace_path
+from agents import organization, ceo_plan
 
 app = FastAPI(title="ORBIT Founder Agent", version="0.1.0")
 STATIC = Path(__file__).parent / "static"
@@ -129,3 +130,16 @@ def status():
     return {"name": "ORBIT", "stage": "foundation", "autonomous_execution": False,
             "desktop_control": False, "browser_research": False, "voice": False,
             "remote_access": False, "tasks": get_tasks(10)}
+
+
+@app.get("/api/organization")
+def get_organization():
+    return organization()
+
+
+@app.post("/api/ceo/plan")
+def founder_request_to_ceo(req: PlanRequest):
+    result = ceo_plan(req.goal)
+    task_id = create_task(result["goal"], result["state"], result)
+    audit("ceo_plan_created", f"task_id={task_id}; goal={result['goal'][:400]}")
+    return {"task_id": task_id, **result}
