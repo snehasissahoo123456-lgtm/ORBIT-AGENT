@@ -28,7 +28,13 @@ This status records code committed to the repository separately from behavior ve
 - [x] Regression tests for duplicate chat context, activation diagnostics, authentication gate and browser URL safety
 - [x] API tests for health and approval gates
 
-## Recently added; local verification still required\n- [x] Dashboard-side unfinished-task reminder after Founder sign-in, with review, remind-later, and explicit-confirmation coding action\n- [x] Windows launcher for installed runtime and opt-in per-user logon startup/disable helpers\n- [ ] Test reminder behavior in the actual Windows browser, including session expiry and an empty task ledger\n- [ ] Run the startup helpers on the Founder's PC and confirm Windows startup behavior\n\n## Partial / requires verification
+## Recently added; local verification still required
+- [x] Dashboard-side unfinished-task reminder after Founder sign-in, with review, remind-later, and explicit-confirmation coding action
+- [x] Windows launcher for installed runtime and opt-in per-user logon startup/disable helpers
+- [ ] Test reminder behavior in the actual Windows browser, including session expiry and an empty task ledger
+- [ ] Run the startup helpers on the Founder's PC and confirm Windows startup behavior
+
+## Partial / requires verification
 - [ ] Install dependencies and run the full app on the Founder's Windows PC; not accessible from this coding session
 - [ ] Test model-driven file edits against a real project and review checkpoints
 - [ ] Verify web search works on the user's network; snippets are leads, not verified facts
