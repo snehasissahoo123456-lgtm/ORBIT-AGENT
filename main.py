@@ -45,6 +45,7 @@ async def founder_auth_gate(request: Request, call_next):
             return JSONResponse(status_code=401,content={"detail":"AUTH_REQUIRED"})
     return await call_next(request)
 RUNNING_JOBS: dict[str, asyncio.Task] = {}
+TASK_SYNC_JOBS: dict[int, asyncio.Task] = {}
 SCHEDULER = AsyncIOScheduler(timezone=ZoneInfo("Asia/Kolkata"))
 
 class AuthRequest(BaseModel):
@@ -285,7 +286,8 @@ async def ceo_execute_approved(req: DeveloperRequest):
     task_id=create_task(req.goal,"RUNNING",plan)
     job=create_job(req.goal)
     RUNNING_JOBS[job["id"]]=asyncio.create_task(run_job(job["id"]),name="orbit-ceo-delegated-"+job["id"])
-    asyncio.create_task(sync_task_state(task_id, job["id"]))
+    TASK_SYNC_JOBS[task_id] = asyncio.create_task(sync_task_state(task_id, job["id"]), name="orbit-task-sync-" + str(task_id))
+    TASK_SYNC_JOBS[task_id].add_done_callback(lambda _task, tid=task_id: TASK_SYNC_JOBS.pop(tid, None))
     audit("ceo_delegated_to_developer",f"task_id={task_id}; job_id={job[chr(105)+chr(100)]}")
     return {"task_id":task_id,"plan":plan,"developer_job":job,"message":"CEO created an auditable plan and delegated implementation to the bounded Developer Agent."}
 
