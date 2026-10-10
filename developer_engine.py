@@ -17,6 +17,19 @@ def _ensure_jobs_table():
             progress TEXT NOT NULL, result_json TEXT NOT NULL DEFAULT '{}',
             created_at TEXT NOT NULL, updated_at TEXT NOT NULL)""")
 
+def recover_interrupted_jobs():
+    """Mark work interrupted by a process restart; never silently resume code edits."""
+    _ensure_jobs_table()
+    with connect() as db:
+        rows=db.execute("SELECT id,state FROM agent_jobs WHERE state IN ('RUNNING','QUEUED')").fetchall()
+        for row in rows:
+            db.execute("UPDATE agent_jobs SET state='NEEDS_REVIEW',progress=?,result_json=?,updated_at=? WHERE id=?",
+                ("Process restarted before the job completed; inspect checkpoint and restart manually.",
+                 json.dumps({"verification":"Interrupted; not verified","error":"ORBIT process restarted"}),now(),row["id"]))
+    for row in rows:
+        audit("developer_job_interrupted",f"id={row[chr(105)+chr(100)]}; prior_state={row[chr(115)+chr(116)+chr(97)+chr(116)+chr(101)]}")
+    return len(rows)
+
 def _update_job(job_id, state=None, progress=None, result=None):
     _ensure_jobs_table()
     with connect() as db:
@@ -157,6 +170,11 @@ async def run_job(job_id: str):
                 "verification":"Not verified; inspect output and checkpoint"}
         _update_job(job_id,state="BLOCKED" if not changed else "NEEDS_REVIEW",progress="Stopped safely; review results",result=result)
         audit("developer_job_blocked",f"id={job_id}; changed={len(set(changed))}")
+    except asyncio.CancelledError:
+        _update_job(job_id,state="STOPPED",progress="Stopped by Founder; inspect checkpoint before continuing",
+                    result={"changed_files":list(dict.fromkeys(changed)),"checkpoint":checkpoint.relative_to(root).as_posix() if checkpoint.exists() else None,"verification":"Stopped; not verified"})
+        audit("developer_job_stopped",f"id={job_id}")
+        raise
     except Exception as exc:
         result={"error":f"{type(exc).__name__}: {exc}","changed_files":list(dict.fromkeys(changed)),
                 "checkpoint":checkpoint.relative_to(root).as_posix() if checkpoint.exists() else None,"verification":"Not verified"}
