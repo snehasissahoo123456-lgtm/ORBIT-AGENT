@@ -216,13 +216,6 @@ async def browser_open(req: OpenPageRequest):
 async def execute_approved_command(req: CommandRequest):
     if not req.approved_by_founder:
         raise HTTPException(403,"Explicit Founder approval is required for every terminal command.")
-    try: return await run_command(req.command,req.cwd,req.timeout)
-    except ValueError as exc: raise HTTPException(400,str(exc)) from exc
-
-@app.post("/api/command/execute")
-async def execute_approved_command(req: CommandRequest):
-    if not req.approved_by_founder:
-        raise HTTPException(403,"Explicit Founder approval is required for every terminal command.")
     try:
         return await run_command(req.command,req.cwd,req.timeout)
     except ValueError as exc:
