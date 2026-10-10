@@ -17,7 +17,13 @@ ORBIT is a local-first AI agent project for a Founder-controlled workspace. The 
 - Startup marks interrupted developer jobs for review instead of silently resuming them
 - Pytest tests and GitHub Actions
 
-## Unfinished-task reminders and startup\n- The dashboard checks the persistent task ledger after Founder sign-in and offers unfinished items to review or continue. It does not run a task merely because the dashboard opened.\n- The reminder offers a review action that puts the saved goal back into the chat/developer fields, a separate coding action that asks for explicit confirmation, and a session-level “Remind me later” option.\n- `START_ORBIT.bat` starts the installed local app without reinstalling dependencies. `ENABLE_ORBIT_STARTUP.bat` optionally adds a per-user Windows sign-in shortcut; `DISABLE_ORBIT_STARTUP.bat` removes it. These scripts must be run on the Founder's PC. They do not install or configure anything from GitHub itself.\n- Local tasks require the PC to be powered on and ORBIT to be running. This is not cloud 24/7 hosting and does not yet provide phone-to-PC remote access.\n\n## Windows quick start
+## Unfinished-task reminders and startup
+- The dashboard checks the persistent task ledger after Founder sign-in and offers unfinished items to review or continue. It does not run a task merely because the dashboard opened.
+- The reminder offers a review action that puts the saved goal back into the chat/developer fields, a separate coding action that asks for explicit confirmation, and a session-level “Remind me later” option.
+- `START_ORBIT.bat` starts the installed local app without reinstalling dependencies. `ENABLE_ORBIT_STARTUP.bat` optionally adds a per-user Windows sign-in shortcut; `DISABLE_ORBIT_STARTUP.bat` removes it. These scripts must be run on the Founder's PC. They do not install or configure anything from GitHub itself.
+- Local tasks require the PC to be powered on and ORBIT to be running. This is not cloud 24/7 hosting and does not yet provide phone-to-PC remote access.
+
+## Windows quick start
 1. Clone or download this repository.
 2. Double-click INSTALL_AND_RUN.bat and allow dependencies to install.
 3. Open http://127.0.0.1:8000.
