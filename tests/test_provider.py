@@ -1,4 +1,4 @@
-import pytest
+import asyncio
 import provider
 
 
@@ -27,12 +27,11 @@ class FakeClient:
         return FakeResponse()
 
 
-@pytest.mark.asyncio
-async def test_chat_does_not_duplicate_current_turn(monkeypatch):
+def test_chat_does_not_duplicate_current_turn(monkeypatch):
     monkeypatch.setattr(provider.httpx, "AsyncClient", FakeClient)
     history = [{"role": "user", "content": "previous question"},
                {"role": "assistant", "content": "previous answer"}]
-    answer = await provider.chat("current question", history=history)
+    answer = asyncio.run(provider.chat("current question", history=history))
     assert answer == "Hello Founder"
     turns = [m["content"] for m in FakeClient.last_payload["messages"] if m["role"] == "user"]
     assert turns.count("current question") == 1
