@@ -12,7 +12,7 @@ from memory import initialise, add_message, audit, get_messages, create_task, ge
 from provider import chat
 from security import workspace_path
 from agents import organization, ceo_plan
-from developer_engine import create_job, get_job, list_jobs, run_job
+from developer_engine import create_job, get_job, list_jobs, run_job, recover_interrupted_jobs
 from research import research, open_page
 from reporting import generate_daily_reports
 from process_tools import run_command
@@ -55,7 +55,8 @@ class DeveloperRequest(BaseModel):
 def on_startup():
     initialise()
     settings.workspace.mkdir(parents=True, exist_ok=True)
-    logger.info("ORBIT started; host=%s port=%s workspace=%s", settings.orbit_host, settings.orbit_port, settings.workspace)
+    interrupted = recover_interrupted_jobs()
+    logger.info("ORBIT started; host=%s port=%s workspace=%s interrupted_jobs=%s", settings.orbit_host, settings.orbit_port, settings.workspace, interrupted)
 
 @app.on_event("shutdown")
 async def on_shutdown():
