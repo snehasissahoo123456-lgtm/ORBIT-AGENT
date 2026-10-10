@@ -9,6 +9,7 @@ This status records code committed to the repository separately from behavior ve
 - [x] Optional Ollama local chat provider
 - [x] Workspace-confined text-file read/write APIs
 - [x] Developer job endpoint requiring explicit Founder approval
+- [x] CEO can delegate an approved goal to the bounded Developer Agent
 - [x] Model-proposed text-file edits with path, size and file-count limits
 - [x] Checkpoints for overwritten files and a bounded three-pass test/fix loop
 - [x] Test runner for recognized Python or npm projects, with captured output
@@ -18,6 +19,7 @@ This status records code committed to the repository separately from behavior ve
 - [x] Daily PDF/PPTX report generation when dependencies are installed
 - [x] Browser speech input/output controls where browser and OS support the selected language
 - [x] Automated unit tests and GitHub Actions workflow
+- [x] API tests for health and approval gates
 
 ## Partial / requires verification
 - [ ] Install dependencies and run the full app on the Founder's Windows PC
