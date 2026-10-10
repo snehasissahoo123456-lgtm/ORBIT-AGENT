@@ -69,3 +69,17 @@ def get_audit(limit: int = 50):
         rows = db.execute("SELECT event,detail,created_at FROM audit_log ORDER BY id DESC LIMIT ?",
                           (max(1, min(limit, 200)),)).fetchall()
     return [dict(r) for r in rows]
+
+def update_task_state(task_id: int, state: str, detail: str = "") -> bool:
+    """Update a persisted task state and record the transition in the audit log."""
+    allowed = {"PLANNED", "NEEDS_APPROVAL", "RUNNING", "VERIFYING", "COMPLETED", "FAILED", "BLOCKED", "NEEDS_REVIEW", "STOPPED"}
+    if state not in allowed:
+        raise ValueError(f"Unsupported task state: {state}")
+    with connect() as db:
+        cur = db.execute("UPDATE tasks SET state=?, updated_at=? WHERE id=?",
+                         (state, now(), int(task_id)))
+    if cur.rowcount:
+        audit("task_state_changed", f"id={task_id}; state={state}; {detail[:500]}")
+        return True
+    return False
+
