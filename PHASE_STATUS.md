@@ -4,6 +4,7 @@ This status records code committed to the repository separately from behavior ve
 
 ## Implemented in repository code
 - [x] FastAPI local application, health/status endpoints and rotating application log
+- [x] Activation diagnostics for SQLite, workspace write access, Ollama connectivity/model availability and Playwright package
 - [x] Founder-root account setup, password hashing and expiring HttpOnly sessions
 - [x] API authentication gate after first Founder setup; public network binding refused
 - [x] SQLite messages, tasks, audit events and durable developer-job records
@@ -17,23 +18,26 @@ This status records code committed to the repository separately from behavior ve
 - [x] Test runner for recognized Python or npm projects, with captured output
 - [x] Allowlisted terminal endpoint requiring explicit approval, no shell=True and a timeout
 - [x] Web research snippets with source URLs
+- [x] Browser reader blocks localhost/private/reserved IP targets and rechecks navigation requests
 - [x] Optional Playwright page text extraction for HTTPS URLs
 - [x] Daily PDF/PPTX report generation when dependencies are installed
 - [x] Daily report scheduler at 23:55 Asia/Kolkata while ORBIT is running
 - [x] Interrupted running/queued jobs are marked for review on restart; jobs are not silently resumed
 - [x] Browser speech input/output controls where browser and OS support the selected language
 - [x] Automated unit tests and GitHub Actions workflow
+- [x] Regression tests for duplicate chat context, activation diagnostics, authentication gate and browser URL safety
 - [x] API tests for health and approval gates
 
 ## Partial / requires verification
-- [ ] Install dependencies and run the full app on the Founder's Windows PC
+- [ ] Install dependencies and run the full app on the Founder's Windows PC; not accessible from this coding session
 - [ ] Test model-driven file edits against a real project and review checkpoints
 - [ ] Verify web search works on the user's network; snippets are leads, not verified facts
 - [ ] Install Playwright Chromium and test browser extraction
 - [ ] Generate and inspect PDF/PPT reports on Windows
 - [ ] Verify voice input/output in English, Hindi and Odia on the target browser/OS; Odia support is not guaranteed
 - [ ] Interrupted jobs are recorded but not automatically resumed after a crash
-- [ ] CEO endpoint still creates a plan; it is not yet a true autonomous multi-agent coordinator
+- [x] CEO execution mirrors Developer Agent terminal state into the task ledger
+- [ ] CEO is still a bounded coordinator, not a true independent multi-specialist agent runtime
 
 ## Not implemented
 - [ ] Full desktop control and application interaction
@@ -59,3 +63,9 @@ This status records code committed to the repository separately from behavior ve
 - Create the Founder account on first launch with a unique password of at least 12 characters.
 - Install and start Ollama separately and pull the configured model for local AI chat and coding.
 - Keep the API local-only; remote control remains disabled.
+
+## Debugging update
+- The Windows launcher now checks the Python version, stops on dependency-install failures and reads the configured host/port from settings.
+- The chat provider now receives persisted history before saving the current user turn, avoiding duplicate current-message context.
+- Use the dashboard's System status & safety panel to inspect activation diagnostics. Ollama must be reachable and the configured model must be installed for local chat and coding.
+- A green API health indicator alone does not prove that the local model is available; inspect the individual diagnostics.
